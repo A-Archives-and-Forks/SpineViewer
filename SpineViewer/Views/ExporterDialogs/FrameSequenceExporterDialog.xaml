@@ -196,6 +196,16 @@
                                 <Label Content="{DynamicResource Str_KeepLastFrame}" ToolTip="{DynamicResource Str_KeepLastFrameTooltip}"/>
                                 <ToggleButton Grid.Column="1" IsChecked="{Binding KeepLast}" ToolTip="{DynamicResource Str_KeelLastFrameTooltip}"/>
                             </Grid>
+
+                            <!-- 是否禁用轨道动画循环 -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="LabelCol"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="{DynamicResource Str_DisableTrackLoop}" ToolTip="{DynamicResource Str_DisableTrackLoopTooltip}"/>
+                                <ToggleButton Grid.Column="1" IsChecked="{Binding DisableTrackLoop}" ToolTip="{DynamicResource Str_DisableTrackLoopTooltip}"/>
+                            </Grid>
                         </StackPanel>
                     </GroupBox>
                 </StackPanel>

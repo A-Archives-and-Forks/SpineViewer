@@ -27,6 +27,9 @@ namespace SpineViewer.ViewModels.Exporters
         public bool KeepLast { get => _keepLast; set => SetProperty(ref _keepLast, value); }
         protected bool _keepLast = true;
 
+        public bool DisableTrackLoop { get => _disableTrackLoop; set => SetProperty(ref _disableTrackLoop, value); }
+        protected bool _disableTrackLoop = false;
+
         /// <summary>
         /// 子类实现获取导出器, 由调用方管理生命周期
         /// </summary>

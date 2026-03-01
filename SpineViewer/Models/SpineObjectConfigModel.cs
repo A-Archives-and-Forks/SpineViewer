@@ -41,8 +41,6 @@ namespace SpineViewer.Models
 
         public List<string> LoadedSkins { get; set; } = [];
 
-        public Dictionary<string, string?> SlotAttachment { get; set; } = [];
-
         public List<string> DisabledSlots { get; set; } = [];
 
         public List<TrackConfigModel?> Animations { get; set; } = [];

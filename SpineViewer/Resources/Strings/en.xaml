@@ -208,6 +208,8 @@
     <s:String x:Key="Str_ExportSpeedTooltip">Export speed factor; only affects the animation speed of the model, not the export duration or frame rate.</s:String>
     <s:String x:Key="Str_KeepLastFrame">Keep Last Frame</s:String>
     <s:String x:Key="Str_KeepLastFrameTooltip">When keeping the last frame, animation is smoother but frame count may be one higher</s:String>
+    <s:String x:Key="Str_DisableTrackLoop">Disable Track Animation Looping</s:String>
+    <s:String x:Key="Str_DisableTrackLoopTooltip">When disabled, all animations on tracks will play only once during export.</s:String>
 
     <s:String x:Key="Str_VideoFormat">Video Format</s:String>
     <s:String x:Key="Str_LoopPlay">Loop Play</s:String>

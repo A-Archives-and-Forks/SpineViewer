@@ -40,7 +40,7 @@ namespace SpineViewer.Models
         private readonly SpineObject _spineObject;
 
         private readonly ImmutableArray<string> _skins;
-        private readonly FrozenDictionary<string, ImmutableArray<string>> _slotAttachments;
+        private readonly ImmutableArray<string> _slots;
         private readonly ImmutableArray<string> _animations;
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace SpineViewer.Models
                 DebugClippings = _loadOptions.DebugClippings
             };
             _skins = _spineObject.Data.Skins.Select(v => v.Name).ToImmutableArray();
-            _slotAttachments = _spineObject.Data.SlotAttachments.ToFrozenDictionary(it => it.Key, it => it.Value.Keys);
+            _slots = _spineObject.Skeleton.Slots.Select(v => v.Name).ToImmutableArray();
             _animations = _spineObject.Data.Animations.Select(v => v.Name).ToImmutableArray();
 
             // 默认自带一个动画
@@ -77,7 +77,7 @@ namespace SpineViewer.Models
         {
             _spineObject = new(cfg.SkelPath, cfg.AtlasPath);
             _skins = _spineObject.Data.Skins.Select(v => v.Name).ToImmutableArray();
-            _slotAttachments = _spineObject.Data.SlotAttachments.ToFrozenDictionary(it => it.Key, it => it.Value.Keys);
+            _slots = _spineObject.Skeleton.Slots.Select(v => v.Name).ToImmutableArray();
             _animations = _spineObject.Data.Animations.Select(v => v.Name).ToImmutableArray();
             ObjectConfig = cfg.ObjectConfig;
             _isShown = cfg.IsShown;
@@ -197,7 +197,7 @@ namespace SpineViewer.Models
             lock (_lock) return _spineObject.SetSkinStatus(skinName, status);
         }
 
-        public FrozenDictionary<string, ImmutableArray<string>> SlotAttachments => _slotAttachments;
+        public ImmutableArray<string> Slots => _slots;
 
         public bool GetSlotVisible(string slotName)
         {
@@ -207,16 +207,6 @@ namespace SpineViewer.Models
         public bool SetSlotVisible(string slotName, bool visible)
         {
             lock (_lock) return _spineObject.SetSlotVisible(slotName, visible);
-        }
-
-        public string? GetAttachment(string slotName)
-        {
-            lock (_lock) return _spineObject.GetAttachment(slotName);
-        }
-
-        public bool SetAttachment(string slotName, string? attachmentName)
-        {
-            lock (_lock) return _spineObject.SetAttachment(slotName, attachmentName);
         }
 
         public ImmutableArray<string> Animations => _animations;
@@ -449,8 +439,6 @@ namespace SpineViewer.Models
 
                     config.LoadedSkins.AddRange(_spineObject.Data.Skins.Select(it => it.Name).Where(_spineObject.GetSkinStatus));
 
-                    foreach (var slot in _spineObject.Skeleton.Slots) config.SlotAttachment[slot.Name] = slot.Attachment?.Name;
-
                     config.DisabledSlots = _spineObject.Skeleton.Slots.Where(it => it.Disabled).Select(it => it.Name).ToList();
 
                     // XXX: 处理空动画
@@ -501,12 +489,6 @@ namespace SpineViewer.Models
                         _spineObject.SetSkinStatus(name, false);
                     foreach (var name in m.LoadedSkins)
                         _spineObject.SetSkinStatus(name, true);
-                }
-
-                if (flag == SpineObjectConfigApplyFlag.All || flag == SpineObjectConfigApplyFlag.SlotAttachement)
-                {
-                    foreach (var (slotName, attachmentName) in m.SlotAttachment)
-                        _spineObject.SetAttachment(slotName, attachmentName);
                 }
 
                 if (flag == SpineObjectConfigApplyFlag.All || flag == SpineObjectConfigApplyFlag.SlotVisibility)
@@ -612,7 +594,6 @@ namespace SpineViewer.Models
     {
         All,
         Skin,
-        SlotAttachement,
         SlotVisibility,
     }
 

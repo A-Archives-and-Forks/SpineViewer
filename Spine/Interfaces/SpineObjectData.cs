@@ -38,8 +38,6 @@ namespace Spine.Interfaces
 
         public abstract FrozenDictionary<string, ISkin> SkinsByName { get; }
 
-        public abstract FrozenDictionary<string, FrozenDictionary<string, IAttachment>> SlotAttachments { get; }
-
         public abstract ImmutableArray<IAnimation> Animations { get; }
 
         public abstract FrozenDictionary<string, IAnimation> AnimationsByName { get; }

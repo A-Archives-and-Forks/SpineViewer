@@ -74,7 +74,7 @@ namespace SpineViewerCLI
             }
             if (all || result.GetValue(OptSlot))
             {
-                SlotRecord[] data = spine.Data.SlotAttachments.Select(v => new SlotRecord(v.Key, v.Value.Keys.ToArray())).ToArray();
+                SlotRecord[] data = spine.Skeleton.Slots.Select(v => new SlotRecord(v.Name)).ToArray();
                 PrintData("Slots", SlotRecord.Headers, data);
             }
         }
@@ -112,10 +112,10 @@ namespace SpineViewerCLI
         public override object[] Values => [Name, Duration];
     }
 
-    public record SlotRecord(string Name, string[] Attachments) : RowRecord
+    public record SlotRecord(string Name) : RowRecord
     {
-        public static string[] Headers { get; } = [nameof(Name), nameof(Attachments)];
+        public static string[] Headers { get; } = [nameof(Name)];
 
-        public override object[] Values => [Name, string.Join(';', Attachments)];
+        public override object[] Values => [Name];
     }
 }
