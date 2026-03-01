@@ -85,7 +85,15 @@ namespace SpineViewer.ViewModels.Exporters
         {
             base.Export(models);
             if (!DialogService.ShowFFmpegVideoExporterDialog(this)) return;
-            SpineObject[] spines = models.Select(m => m.GetSpineObject()).ToArray();
+            SpineObject[] spines = models.Select(m => m.GetSpineObject()).ToArray(); 
+
+            if (_disableTrackLoop)
+            {
+                foreach (var sp in spines)
+                    foreach (var tr in sp.AnimationState.IterTracks().Where(t => t is not null))
+                        tr.Loop = false;
+            }
+
             ProgressService.RunAsync((pr, ct) => ExportTask(spines, pr, ct), AppResource.Str_FFmpegVideoExporterTitle);
             foreach (var sp in spines) sp.Dispose();
         }

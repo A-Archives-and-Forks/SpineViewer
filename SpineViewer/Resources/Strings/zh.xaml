@@ -208,6 +208,8 @@
     <s:String x:Key="Str_ExportSpeedTooltip">导出速度因子，仅影响模型的动作速度，不影响导出时长和帧率等参数</s:String>
     <s:String x:Key="Str_KeepLastFrame">保留最后一帧</s:String>
     <s:String x:Key="Str_KeepLastFrameTooltip">当设置保留最后一帧时，动图会更为连贯，但是帧数可能比预期帧数多 1</s:String>
+    <s:String x:Key="Str_DisableTrackLoop">禁用轨道动画循环</s:String>
+    <s:String x:Key="Str_DisableTrackLoopTooltip">禁用后在导出时所有轨道上的动画只播放一次</s:String>
 
     <s:String x:Key="Str_VideoFormat">视频格式</s:String>
     <s:String x:Key="Str_LoopPlay">循环播放</s:String>

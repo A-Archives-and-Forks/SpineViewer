@@ -93,6 +93,11 @@ namespace SpineViewerCLI
             AllowMultipleArgumentsPerToken = true,
         };
 
+        public Option<bool> OptDisableTrackLoop { get; } = new("--disable-track-loop")
+        {
+            Description = "Disable track animation looping. When disabled, all track animations will play only once.",
+        };
+
         public Option<float> OptWarmUp { get; } = new("--warm-up")
         {
             Description = "Warm-up duration of the animation, used to stabilize physics effects. A negative value will automatically warm up for the maximum duration among all animations.",
@@ -284,6 +289,7 @@ namespace SpineViewerCLI
             spine.UsePma = result.GetValue(OptPma);
 
             // 设置要导出的动画
+            var isTrackLoop = !result.GetValue(OptDisableTrackLoop);
             int trackIdx = 0;
             foreach (var name in result.GetValue(OptAnimations))
             {
@@ -292,7 +298,7 @@ namespace SpineViewerCLI
                     _logger.Warn("No animation named '{0}', skip it", name);
                     continue;
                 }
-                spine.AnimationState.SetAnimation(trackIdx, name, true);
+                spine.AnimationState.SetAnimation(trackIdx, name, isTrackLoop);
                 trackIdx++;
             }
 

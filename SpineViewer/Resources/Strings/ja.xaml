@@ -208,6 +208,8 @@
     <s:String x:Key="Str_ExportSpeedTooltip">エクスポート速度係数。モデルの動作速度のみに影響し、エクスポート時間やフレームレートなどには影響しません。</s:String>
     <s:String x:Key="Str_KeepLastFrame">最後のフレームを保持</s:String>
     <s:String x:Key="Str_KeepLastFrameTooltip">最後のフレームを保持すると、アニメーションはより連続して見えますが、フレーム数が予想より1フレーム多くなる可能性があります</s:String>
+    <s:String x:Key="Str_DisableTrackLoop">トラックアニメーションのループを無効化</s:String>
+    <s:String x:Key="Str_DisableTrackLoopTooltip">無効化すると、エクスポート時にすべてのトラック上のアニメーションは1回のみ再生されます。</s:String>
 
     <s:String x:Key="Str_VideoFormat">ビデオフォーマット</s:String>
     <s:String x:Key="Str_LoopPlay">ループ再生</s:String>
