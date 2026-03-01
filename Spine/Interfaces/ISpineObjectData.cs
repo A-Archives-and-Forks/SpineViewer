@@ -30,11 +30,6 @@ namespace Spine.Interfaces
         public FrozenDictionary<string, ISkin> SkinsByName { get; }
 
         /// <summary>
-        /// 所有皮肤中所有插槽的可用附件集合, 并不保证所有插槽均在此处有键
-        /// </summary>
-        public FrozenDictionary<string, FrozenDictionary<string, IAttachment>> SlotAttachments { get; }
-
-        /// <summary>
         /// 所有动画
         /// </summary>
         public ImmutableArray<IAnimation> Animations { get; }

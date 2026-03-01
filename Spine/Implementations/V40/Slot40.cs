@@ -53,7 +53,7 @@ namespace Spine.Implementations.V40
             {
                 if (_o.Attachment is Attachment att)
                 {
-                    return _data.SlotAttachments[Name][att.Name];
+                    return _data.GetAttachment(att);
                 }
                 return null;
             }
