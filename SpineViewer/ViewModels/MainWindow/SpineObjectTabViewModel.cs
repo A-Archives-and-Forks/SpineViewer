@@ -40,8 +40,8 @@ namespace SpineViewer.ViewModels.MainWindow
                     foreach (var obj in _selectedObjects.Skip(1)) commonSkinNames = commonSkinNames.Intersect(obj.Skins);
                     foreach (var name in commonSkinNames.Order()) _skins.Add(new(name, _selectedObjects));
 
-                    IEnumerable<string> commonSlotNames = _selectedObjects[0].SlotAttachments.Keys;
-                    foreach (var obj in _selectedObjects.Skip(1)) commonSlotNames = commonSlotNames.Intersect(obj.SlotAttachments.Keys);
+                    IEnumerable<string> commonSlotNames = _selectedObjects[0].Slots;
+                    foreach (var obj in _selectedObjects.Skip(1)) commonSlotNames = commonSlotNames.Intersect(obj.Slots);
                     foreach (var name in commonSlotNames.Order()) _slots.Add(new(name, _selectedObjects));
 
                     IEnumerable<int> commonTrackIndices = _selectedObjects[0].GetTrackIndices();
@@ -683,45 +683,15 @@ namespace SpineViewer.ViewModels.MainWindow
         public class SlotViewModel : ObservableObject
         {
             private readonly SpineObjectModel[] _spines;
-            private readonly string[] _attachmentNames = [];
             private readonly string _slotName;
 
             public SlotViewModel(string slotName, SpineObjectModel[] spines)
             {
                 _spines = spines;
                 _slotName = slotName;
-
-                if (_spines.Length > 0)
-                {
-                    IEnumerable<string> attachmentNames = _spines[0].SlotAttachments[_slotName];
-                    foreach (var sp in _spines.Skip(1))
-                        attachmentNames = attachmentNames.Union(sp.SlotAttachments[_slotName]);
-                    _attachmentNames = attachmentNames.ToArray();
-                }
             }
-
-            public IReadOnlyList<string> AttachmentNames => _attachmentNames;
 
             public string SlotName => _slotName;
-
-            public string? AttachmentName
-            {
-                get
-                {
-                    if (_spines.Length <= 0) return null;
-                    var val = _spines[0].GetAttachment(_slotName);
-                    if (_spines.Skip(1).Any(it => it.GetAttachment(_slotName) != val)) return null;
-                    return val;
-                }
-
-                set
-                {
-                    if (_spines.Length <= 0) return;
-                    bool changed = false;
-                    foreach (var sp in _spines) if (sp.SetAttachment(_slotName, value)) changed = true;
-                    if (changed) OnPropertyChanged();
-                }
-            }
 
             public bool? Visible
             {

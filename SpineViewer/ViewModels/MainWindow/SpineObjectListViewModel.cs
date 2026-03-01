@@ -502,15 +502,6 @@ namespace SpineViewer.ViewModels.MainWindow
         private RelayCommand<IList?>? _cmd_CopySpineObjectSkinConfig;
 
         /// <summary>
-        /// 复制模型参数 (仅插槽附件)
-        /// </summary>
-        public RelayCommand<IList?> Cmd_CopySpineObjectSlotAttachmentConfig => _cmd_CopySpineObjectSlotAttachmentConfig ??= new(
-            args => CopySpineObjectConfig_Execute(args, SpineObjectConfigApplyFlag.SlotAttachement), 
-            CopySpineObjectConfig_CanExecute
-        );
-        private RelayCommand<IList?>? _cmd_CopySpineObjectSlotAttachmentConfig;
-
-        /// <summary>
         /// 复制模型参数 (仅插槽可见性)
         /// </summary>
         public RelayCommand<IList?> Cmd_CopySpineObjectSlotVisibilityConfig => _cmd_CopySpineObjectSlotVisibilityConfig ??= new(

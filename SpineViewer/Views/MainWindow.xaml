@@ -506,10 +506,8 @@
                                                                 <Grid.ColumnDefinitions>
                                                                     <ColumnDefinition Width="Auto" SharedSizeGroup="ColSlotName"/>
                                                                     <ColumnDefinition Width="*"/>
-                                                                    <ColumnDefinition Width="Auto"/>
                                                                 </Grid.ColumnDefinitions>
                                                                 <Label Grid.Column="0" Content="{Binding SlotName}" HorizontalAlignment="Left"/>
-                                                                <ComboBox Grid.Column="1" SelectedValue="{Binding AttachmentName}" ItemsSource="{Binding AttachmentNames}"/>
                                                                 <ToggleButton Grid.Column="2" IsChecked="{Binding Visible}"/>
                                                             </Grid>
                                                         </Border>

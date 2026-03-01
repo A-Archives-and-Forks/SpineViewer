@@ -335,16 +335,6 @@ namespace Spine
         }
 
         /// <summary>
-        /// 获取某个插槽上的附件名, 插槽不存在或者无附件均返回 null
-        /// </summary>
-        public string? GetAttachment(string slotName)
-        {
-            if (_skeleton.SlotsByName.TryGetValue(slotName, out var slot))
-                return slot.Attachment?.Name;
-            return null;
-        }
-
-        /// <summary>
         /// 查询皮肤加载状态, 皮肤不存在时返回 false
         /// </summary>
         public bool GetSkinStatus(string name) => name == "default" || _skinLoadStatus.TryGetValue(name, out var status) && status;
