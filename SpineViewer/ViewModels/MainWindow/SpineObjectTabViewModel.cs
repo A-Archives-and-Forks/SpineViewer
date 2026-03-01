@@ -37,16 +37,24 @@ namespace SpineViewer.ViewModels.MainWindow
                 if (_selectedObjects.Length > 0)
                 {
                     IEnumerable<string> commonSkinNames = _selectedObjects[0].Skins;
-                    foreach (var obj in _selectedObjects.Skip(1)) commonSkinNames = commonSkinNames.Intersect(obj.Skins);
-                    foreach (var name in commonSkinNames.Order()) _skins.Add(new(name, _selectedObjects));
+                    foreach (var obj in _selectedObjects.Skip(1)) 
+                        commonSkinNames = commonSkinNames.Intersect(obj.Skins);
+                    foreach (var name in commonSkinNames.Order()) 
+                        _skins.Add(new(name, _selectedObjects));
 
                     IEnumerable<string> commonSlotNames = _selectedObjects[0].Slots;
-                    foreach (var obj in _selectedObjects.Skip(1)) commonSlotNames = commonSlotNames.Intersect(obj.Slots);
-                    foreach (var name in commonSlotNames.Order()) _slots.Add(new(name, _selectedObjects));
+                    foreach (var obj in _selectedObjects.Skip(1)) 
+                        commonSlotNames = commonSlotNames.Intersect(obj.Slots);
+                    if (!string.IsNullOrWhiteSpace(_slotFilterString)) 
+                        commonSlotNames = commonSlotNames.Where(v => v.Contains(_slotFilterString));
+                    foreach (var name in commonSlotNames.Order())
+                        _slots.Add(new(name, _selectedObjects));
 
                     IEnumerable<int> commonTrackIndices = _selectedObjects[0].GetTrackIndices();
-                    foreach (var obj in _selectedObjects.Skip(1)) commonTrackIndices = commonTrackIndices.Intersect(obj.GetTrackIndices());
-                    foreach (var idx in commonTrackIndices.Order()) _animationTracks.Add(new(idx, _selectedObjects));
+                    foreach (var obj in _selectedObjects.Skip(1)) 
+                        commonTrackIndices = commonTrackIndices.Intersect(obj.GetTrackIndices());
+                    foreach (var idx in commonTrackIndices.Order()) 
+                        _animationTracks.Add(new(idx, _selectedObjects));
                 }
 
                 OnPropertyChanged();
@@ -348,6 +356,30 @@ namespace SpineViewer.ViewModels.MainWindow
         private RelayCommand _cmd_DisableAllSkins;
 
         public ObservableCollection<SlotViewModel> Slots => _slots;
+
+        public string SlotFilterString
+        {
+            get => _slotFilterString;
+            set
+            {
+                if (!SetProperty(ref _slotFilterString, value))
+                    return;
+
+                // 重新构造 Slots 数组内容
+                _slots.Clear();
+                if (_selectedObjects.Length > 0)
+                {
+                    IEnumerable<string> commonSlotNames = _selectedObjects[0].Slots;
+                    foreach (var obj in _selectedObjects.Skip(1)) 
+                        commonSlotNames = commonSlotNames.Intersect(obj.Slots);
+                    if (!string.IsNullOrWhiteSpace(_slotFilterString)) 
+                        commonSlotNames = commonSlotNames.Where(v => v.Contains(_slotFilterString));
+                    foreach (var name in commonSlotNames.Order()) 
+                        _slots.Add(new(name, _selectedObjects));
+                }
+            }
+        }
+        private string _slotFilterString = "";
 
         public RelayCommand<IList?> Cmd_EnableSlots => _cmd_EnableSlots ??= new (
             args => { if (args is null) return; foreach (var s in args.OfType<SlotViewModel>()) s.Visible = true; },
