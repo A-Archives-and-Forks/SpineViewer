@@ -345,25 +345,6 @@ namespace Spine
         }
 
         /// <summary>
-        /// 设置某个插槽的附件, 如果不存在则忽略, 可以使用 null 来尝试清除附件
-        /// </summary>
-        /// <returns>是否操作成功</returns>
-        public bool SetAttachment(string slotName, string? attachmentName)
-        {
-            if (_skeleton.SlotsByName.TryGetValue(slotName, out var slot) && 
-                _data.SlotAttachments.TryGetValue(slotName, out var slotAttachments))
-            {
-                if (attachmentName is null)
-                    slot.Attachment = null;
-                else if (slotAttachments.TryGetValue(attachmentName, out var attachment))
-                    slot.Attachment = attachment;
-                _skeleton.UpdateCache();
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
         /// 查询皮肤加载状态, 皮肤不存在时返回 false
         /// </summary>
         public bool GetSkinStatus(string name) => name == "default" || _skinLoadStatus.TryGetValue(name, out var status) && status;
@@ -381,7 +362,7 @@ namespace Spine
         }
 
         /// <summary>
-        /// 刷新已加载皮肤, 会丢失自定义插槽附件设置
+        /// 刷新已加载皮肤
         /// </summary>
         public void ReloadSkins()
         {
