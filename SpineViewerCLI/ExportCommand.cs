@@ -30,6 +30,20 @@ namespace SpineViewerCLI
         Psd = 0x0500,
     }
 
+    public struct FixedViewOptions
+    {
+        public uint Width;
+        public uint Height;
+        public float CenterX;
+        public float CenterY;
+        public float Scale = 1f;
+
+        public FixedViewOptions() { }
+
+        public readonly float ViewWidth { get => Width / Scale; }
+        public readonly float ViewHeight { get => Height / Scale; }
+    }
+
     public class ExportCommand : Command
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -117,7 +131,7 @@ namespace SpineViewerCLI
         {
             Description = "Background color of content, omitted for PSD format.",
             //DefaultValueFactory = ...
-            CustomParser = Utils.ParseColor
+            CustomParser = Utils.ParseColor,
         };
 
         public Option<uint> OptMargin { get; } = new("--margin")
@@ -130,6 +144,12 @@ namespace SpineViewerCLI
         {
             Description = "Maximum width or height (in pixels) for exported images.",
             DefaultValueFactory = _ => 2048u,
+        };
+
+        public Option<FixedViewOptions?> OptFixedView { get; } = new("--fixed-view")
+        {
+            Description = "Manually set a fixed export view. Format: `arg1:value1[|arg2:value2][...]`. Each parameter is specified as `name:value` and separated by `|`. Supported parameters are `w:uint|h:uint|x:float|y:float|s:float`, representing canvas width and height (in pixels), view center coordinates, and view scale.",
+            CustomParser = Utils.ParseFixedView,
         };
 
         public Option<float> OptTime { get; } = new("--time")
@@ -363,19 +383,36 @@ namespace SpineViewerCLI
         {
             var formatType = (int)result.GetValue(OptFormat) >> 8;
 
-            // 根据模型获取自动分辨率和视区参数
-            var maxResolution = result.GetValue(OptMaxResolution);
             var margin = result.GetValue(OptMargin);
-            var bounds = formatType == 0x01 ? spine.GetCurrentBounds() : spine.GetAnimationBounds(result.GetValue(OptFps));
-            var resolution = new SFML.System.Vector2u((uint)bounds.Size.X, (uint)bounds.Size.Y);
-            if (resolution.X >= maxResolution || resolution.Y >= maxResolution)
+            SFML.System.Vector2u resolution;
+            SFML.Graphics.FloatRect viewBounds;
+
+            if (result.GetValue(OptFixedView) is FixedViewOptions fvopts)
             {
-                // 缩小到最大像素限制
-                var scale = Math.Min(maxResolution / bounds.Width, maxResolution / bounds.Height);
-                resolution.X = (uint)(bounds.Width * scale);
-                resolution.Y = (uint)(bounds.Height * scale);
+                // 手动设置导出视区
+                resolution = new(fvopts.Width, fvopts.Height);
+                viewBounds = new(
+                    fvopts.CenterX - fvopts.ViewWidth / 2, 
+                    fvopts.CenterY - fvopts.ViewHeight / 2, 
+                    fvopts.ViewWidth, 
+                    fvopts.ViewHeight
+                );
             }
-            var viewBounds = bounds.GetCanvasBounds(resolution, margin);
+            else
+            {
+                // 根据模型获取自动分辨率和视区参数
+                var maxResolution = result.GetValue(OptMaxResolution);
+                var bounds = formatType == 0x01 ? spine.GetCurrentBounds() : spine.GetAnimationBounds(result.GetValue(OptFps));
+                resolution = new((uint)bounds.Size.X, (uint)bounds.Size.Y);
+                if (resolution.X >= maxResolution || resolution.Y >= maxResolution)
+                {
+                    // 缩小到最大像素限制
+                    var scale = Math.Min(maxResolution / bounds.Width, maxResolution / bounds.Height);
+                    resolution.X = (uint)(bounds.Width * scale);
+                    resolution.Y = (uint)(bounds.Height * scale);
+                }
+                viewBounds = bounds.GetCanvasBounds(resolution, margin);
+            }
 
             var duration = result.GetValue(OptDuration);
             if (duration < 0) duration = spine.GetAnimationMaxDuration();
