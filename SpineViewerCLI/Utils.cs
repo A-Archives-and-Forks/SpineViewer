@@ -10,6 +10,94 @@ namespace SpineViewerCLI
 {
     public static class Utils
     {
+        public static FixedViewOptions? ParseFixedView(ArgumentResult result)
+        {
+            const string separator = ",";
+            const string assignment = "=";
+
+            var token = result.Tokens.Count > 0 ? result.Tokens[0].Value : null;
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            try
+            {
+                var pairs = token.Split(separator);
+                var opts = new FixedViewOptions();
+                bool ret;
+                foreach (var it in pairs)
+                {
+                    var kv = it.Trim().Split(assignment);
+                    if (kv.Length != 2)
+                    {
+                        result.AddError($"Invalid fixed view format: {it}.");
+                        return null;
+                    }
+                    switch (kv[0].ToLowerInvariant().Trim())
+                    {
+                        case "w":
+                            ret = uint.TryParse(kv[1], out var w); 
+                            if (!ret || w <= 0)
+                            {
+                                result.AddError($"Invalid width value: {kv[1]}.");
+                                return null;
+                            }
+                            opts.Width = w;
+                            break;
+                        case "h":
+                            ret = uint.TryParse(kv[1], out var h);
+                            if (!ret || h <= 0)
+                            {
+                                result.AddError($"Invalid height value: {kv[1]}.");
+                                return null;
+                            }
+                            opts.Height = h;
+                            break;
+                        case "x":
+                            ret = float.TryParse(kv[1], out var x);
+                            if (!ret)
+                            {
+                                result.AddError($"Invalid center x value: {kv[1]}.");
+                                return null;
+                            }
+                            opts.CenterX = x;
+                            break;
+                        case "y":
+                            ret = float.TryParse(kv[1], out var y);
+                            if (!ret)
+                            {
+                                result.AddError($"Invalid center y value: {kv[1]}.");
+                                return null;
+                            }
+                            opts.CenterY = y;
+                            break;
+                        case "s":
+                            ret = float.TryParse(kv[1], out var s);
+                            if (!ret || s <= 0)
+                            {
+                                result.AddError($"Invalid scale value: {kv[1]}.");
+                                return null;
+                            }
+                            opts.Scale = s;
+                            break;
+                        default:
+                            result.AddError($"Invalid arg value: {it}.");
+                            return null;
+                    }
+                }
+                if (opts.Width <= 0 || opts.Height <= 0)
+                {
+                    result.AddError($"Width and height must be set.");
+                    return null;
+                }
+                return opts;
+            }
+            catch
+            {
+                result.AddError("Invalid fixed view format.");
+                return null;
+            }
+        }
+
         public static Color ParseColor(ArgumentResult result)
         {
             var token = result.Tokens.Count > 0 ? result.Tokens[0].Value : null;

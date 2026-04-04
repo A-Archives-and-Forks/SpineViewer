@@ -30,23 +30,24 @@ namespace Spine.Exporters
         /// <summary>
         /// 用于渲染的画布
         /// </summary>
-        protected RenderTexture _renderTexture;
+        protected RenderTexture? _renderTexture;
+
+        /// <summary>
+        /// 画布大小 (分辨率)
+        /// </summary>
+        protected Vector2u _resolution = new(100, 100);
+
+        /// <summary>
+        /// 用于 <see cref="_renderTexture"/> 的 <see cref="View"/> 对象
+        /// </summary>
+        protected View _renderView = new();
 
         /// <summary>
         /// 初始化导出器
         /// </summary>
         /// <param name="width">画布宽像素值</param>
         /// <param name="height">画布高像素值</param>
-        public BaseExporter(uint width , uint height)
-        {
-            // XXX: 强制变成 2 的倍数, 防止像是 yuv420p 这种像素格式报错
-            width = width >> 1 << 1;
-            height = height >> 1 << 1;
-            if (width <= 0 || height <= 0)
-                throw new ArgumentException($"Invalid resolution: {width}, {height}");
-            _renderTexture = new(width, height);
-            _renderTexture.SetActive(false);
-        }
+        public BaseExporter(uint width, uint height) : this(new(width, height)) { }
 
         /// <summary>
         /// 初始化导出器
@@ -58,8 +59,7 @@ namespace Spine.Exporters
             resolution.Y = resolution.Y >> 1 << 1;
             if (resolution.X <= 0 || resolution.Y <= 0)
                 throw new ArgumentException($"Invalid resolution: {resolution}");
-            _renderTexture = new(resolution.X, resolution.Y);
-            _renderTexture.SetActive(false);
+            _resolution = resolution;
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace Spine.Exporters
         /// </summary>
         public Vector2u Resolution
         {
-            get => _renderTexture.Size;
+            get => _resolution;
             set
             {
                 // XXX: 强制变成 2 的倍数, 防止像是 yuv420p 这种像素格式报错
@@ -109,15 +109,7 @@ namespace Spine.Exporters
                     _logger.Warn("Omit invalid exporter resolution: {0}", value);
                     return;
                 }
-                if (_renderTexture.Size != value)
-                {
-                    using var old = _renderTexture;
-                    using var view = old.GetView();
-                    var renderTexture = new RenderTexture(value.X, value.Y);
-                    renderTexture.SetActive(false);
-                    renderTexture.SetView(view);
-                    _renderTexture = renderTexture;
-                }
+                _resolution = value;
             }
         }
 
@@ -126,8 +118,8 @@ namespace Spine.Exporters
         /// </summary>
         public FloatRect Viewport
         {
-            get { using var view = _renderTexture.GetView(); return view.Viewport; }
-            set { using var view = _renderTexture.GetView(); view.Viewport = value; _renderTexture.SetView(view); }
+            get => _renderView.Viewport;
+            set => _renderView.Viewport = value;
         }
 
         /// <summary>
@@ -135,8 +127,8 @@ namespace Spine.Exporters
         /// </summary>
         public Vector2f Center
         {
-            get { using var view = _renderTexture.GetView(); return view.Center; }
-            set { using var view = _renderTexture.GetView(); view.Center = value; _renderTexture.SetView(view); }
+            get => _renderView.Center;
+            set => _renderView.Center = value;
         }
 
         /// <summary>
@@ -144,8 +136,8 @@ namespace Spine.Exporters
         /// </summary>
         public Vector2f Size
         {
-            get { using var view = _renderTexture.GetView(); return view.Size; }
-            set { using var view = _renderTexture.GetView(); view.Size = value; _renderTexture.SetView(view); }
+            get => _renderView.Size;
+            set => _renderView.Size = value;
         }
 
         /// <summary>
@@ -153,15 +145,30 @@ namespace Spine.Exporters
         /// </summary>
         public float Rotation
         {
-            get { using var view = _renderTexture.GetView(); return view.Rotation; }
-            set { using var view = _renderTexture.GetView(); view.Rotation = value; _renderTexture.SetView(view); }
+            get => _renderView.Rotation;
+            set => _renderView.Rotation = value;
         }
 
         /// <summary>
-        /// 获取的一帧, 结果是预乘的
+        /// 辅助函数, 用于获取 <see cref="_renderTexture"/> 对象
+        /// </summary>
+        protected RenderTexture GetRenderTexture()
+        {
+            // XXX: 调试的时候发现 RenderTexture 对象在子线程中进行渲染后, 主线程可能无法正常 Dispose 其资源
+            // 所以改成调用时调用方自己临时申请和管理
+            var tex = new RenderTexture(_resolution.X, _resolution.Y);
+            tex.SetView(_renderView);
+            return tex;
+        }
+
+        /// <summary>
+        /// 获取的一帧, 结果是预乘的, 调用方需要管理 <see cref="_renderTexture"/> 对象生命周期
         /// </summary>
         protected SFMLImageVideoFrame GetFrame(SpineObject[] spines)
         {
+            if (_renderTexture is null)
+                throw new InvalidOperationException("Caller must manage the RenderTexture object.");
+
             _renderTexture.SetActive(true);
             _renderTexture.Clear(_backgroundColorPma);
             foreach (var sp in spines.Reverse()) _renderTexture.Draw(sp);
@@ -187,7 +194,14 @@ namespace Spine.Exporters
             if (_disposed) return;
             if (disposing)
             {
-                _renderTexture.Dispose();
+                if (_renderTexture is not null)
+                {
+                    _logger.Warn("RenderTexture disposing");
+                    _renderTexture?.Dispose();
+                    _renderTexture = null;
+                }
+                _renderView?.Dispose();
+                _renderView = null;
             }
             _disposed = true;
         }
