@@ -12,24 +12,27 @@ namespace SpineViewerCLI
     {
         public static FixedViewOptions? ParseFixedView(ArgumentResult result)
         {
+            const string separator = ",";
+            const string assignment = "=";
+
             var token = result.Tokens.Count > 0 ? result.Tokens[0].Value : null;
             if (string.IsNullOrWhiteSpace(token))
                 return null;
 
             try
             {
-                var pairs = token.Split("|");
+                var pairs = token.Split(separator);
                 var opts = new FixedViewOptions();
                 bool ret;
                 foreach (var it in pairs)
                 {
-                    var kv = it.Split(":");
+                    var kv = it.Trim().Split(assignment);
                     if (kv.Length != 2)
                     {
                         result.AddError($"Invalid fixed view format: {it}.");
                         return null;
                     }
-                    switch (kv[0].ToLowerInvariant())
+                    switch (kv[0].ToLowerInvariant().Trim())
                     {
                         case "w":
                             ret = uint.TryParse(kv[1], out var w); 

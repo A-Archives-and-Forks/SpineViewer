@@ -148,7 +148,7 @@ namespace SpineViewerCLI
 
         public Option<FixedViewOptions?> OptFixedView { get; } = new("--fixed-view")
         {
-            Description = "Manually set a fixed export view. Format: `arg1:value1[|arg2:value2][...]`. Each parameter is specified as `name:value` and separated by `|`. Supported parameters are `w:uint|h:uint|x:float|y:float|s:float`, representing canvas width and height (in pixels), view center coordinates, and view scale.",
+            Description = "Manually set a fixed export view. Format: `arg1=value1[,arg2=value2][...]`. Each parameter is specified as `name=value` and separated by `,`. Supported parameters are `w=uint,h=uint,x=float,y=float,s=float`, representing canvas width and height (in pixels), view center coordinates, and view scale.",
             CustomParser = Utils.ParseFixedView,
         };
 
