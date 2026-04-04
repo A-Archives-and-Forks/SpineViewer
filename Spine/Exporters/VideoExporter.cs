@@ -94,10 +94,13 @@ namespace Spine.Exporters
         }
 
         /// <summary>
-        /// 生成帧序列, 用于导出帧序列
+        /// 生成帧序列, 用于导出帧序列, 需要调用方管理 <see cref="_renderTexture"/> 生命周期
         /// </summary>
         protected IEnumerable<SFMLImageVideoFrame> GetFrames(SpineObject[] spines)
         {
+            if (_renderTexture is null)
+                throw new InvalidOperationException("Caller must manage the RenderTexture object.");
+
             float delta = 1f / _fps;
             int total = (int)(_duration * _fps); // 完整帧的数量
             var deltaFinal = _duration - delta * total; // 最后一帧时长
@@ -129,6 +132,9 @@ namespace Spine.Exporters
         {
             // XXX: 也许和 SFML 多线程或者 FFmpeg 调用有关, GetFrame 无法在异步调用中连续使用, 会导致画面帧丢失或者卡死等异常现象
             // 因此把帧生成包在一个子线程中连续调用, 通过成员变量和锁来输出帧数据
+
+            _renderTexture = GetRenderTexture();
+
             foreach (var frame in GetFrames(spines))
             {
                 while (!ct.IsCancellationRequested)
@@ -148,6 +154,9 @@ namespace Spine.Exporters
                 }
                 _frameOutput = frame;
             }
+
+            _renderTexture.Dispose();
+            _renderTexture = null;
         }
 
         /// <summary>

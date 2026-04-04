@@ -42,12 +42,17 @@ namespace Spine.Exporters
 
         public override void Export(string output, params SpineObject[] spines)
         {
+            _renderTexture = GetRenderTexture();
+
             using var frame = GetFrame(spines);
             var info = new SKImageInfo(frame.Width, frame.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
             using var skImage = SKImage.FromPixelCopy(info, frame.Image.Pixels);
             using var data = skImage.Encode(_format, _quality);
             using var stream = File.OpenWrite(output);
             data.SaveTo(stream);
+
+            _renderTexture.Dispose();
+            _renderTexture = null;
         }
 
         /// <summary>
@@ -55,8 +60,14 @@ namespace Spine.Exporters
         /// </summary>
         public SKImage ExportMemoryImage(params SpineObject[] spines)
         {
+            _renderTexture = GetRenderTexture();
+
             using var frame = GetFrame(spines);
             var info = new SKImageInfo(frame.Width, frame.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
+
+            _renderTexture.Dispose();
+            _renderTexture = null;
+
             return SKImage.FromPixelCopy(info, frame.Image.Pixels);
         }
     }
