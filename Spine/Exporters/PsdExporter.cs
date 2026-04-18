@@ -24,9 +24,10 @@ namespace Spine.Exporters
         /// <param name="spines">要导出的模型, 从前往后对应从上往下的渲染顺序</param>
         public void Export(string output, CancellationToken ct, params SpineObject[] spines)
         {
+            _renderTexture = GetRenderTexture();
+
             var resolution = _renderTexture.Size;
             var psdWriter = new PsdWriter.PsdWriter(resolution.X, resolution.Y);
-            _renderTexture.SetActive(true);
 
             var layerCount = spines.Select(sp => sp.IterDrawCount).Sum();
             var layerIdx = 0;
@@ -56,8 +57,10 @@ namespace Spine.Exporters
                 psdWriter.EndGroup();
             }
 
-            _renderTexture.SetActive(false);
             psdWriter.WriteTo(output);
+
+            _renderTexture.Dispose();
+            _renderTexture = null;
         }
 
         private string ConvertBlendMode(SFML.Graphics.BlendMode blendMode)
