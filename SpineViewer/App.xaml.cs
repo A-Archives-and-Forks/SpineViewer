@@ -277,8 +277,16 @@ namespace SpineViewer
             {
                 try
                 {
-                    // 检查 .skel 的 ProgID
+                    // 检查 .skel 的 ProgID 关联
                     using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Classes\.skel"))
+                    {
+                        var progIdValue = key?.GetValue("") as string;
+                        if (!string.Equals(progIdValue, App.ProgId, StringComparison.OrdinalIgnoreCase))
+                            return false;
+                    }
+
+                    // 检查 .json 的 ProgID 关联
+                    using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Classes\.json"))
                     {
                         var progIdValue = key?.GetValue("") as string;
                         if (!string.Equals(progIdValue, App.ProgId, StringComparison.OrdinalIgnoreCase))
@@ -303,12 +311,6 @@ namespace SpineViewer
             {
                 if (value)
                 {
-                    // 文件关联
-                    using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\.skel"))
-                    {
-                        key?.SetValue("", App.ProgId);
-                    }
-
                     using (var key = Registry.CurrentUser.CreateSubKey($@"Software\Classes\{App.ProgId}"))
                     {
                         key?.SetValue("", SkelFileDescription);
@@ -321,11 +323,24 @@ namespace SpineViewer
                             shellKey?.SetValue("", ShellOpenCommand);
                         }
                     }
+
+                    // .skel 文件关联
+                    using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\.skel"))
+                    {
+                        key?.SetValue("", App.ProgId);
+                    }
+
+                    // .json 文件关联
+                    using (var key = Registry.CurrentUser.CreateSubKey(@"Software\Classes\.json"))
+                    {
+                        key?.SetValue("", App.ProgId);
+                    }
                 }
                 else
                 {
                     // 删除关联
                     Registry.CurrentUser.DeleteSubKeyTree(@"Software\Classes\.skel", false);
+                    Registry.CurrentUser.DeleteSubKeyTree(@"Software\Classes\.json", false);
                     Registry.CurrentUser.DeleteSubKeyTree($@"Software\Classes\{App.ProgId}", false);
                 }
 
